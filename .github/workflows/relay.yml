@@ -2,8 +2,13 @@ name: relay-hourly
 
 on:
   schedule:
-    - cron: "0 * * * *"      # 毎時
+    - cron: "0 * * * *"    # 毎時（UTC）
   workflow_dispatch: {}
+
+# ← 二重起動しても dispatch は常に1本だけになる
+concurrency:
+  group: relay-hourly
+  cancel-in-progress: true
 
 jobs:
   ping:
@@ -11,13 +16,14 @@ jobs:
     steps:
       - name: Trigger repository_dispatch
         env:
-          GH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}   # ← このリポの Secrets に保存したPAT
-          OWNER: ryujin2023                         # ← あなたのユーザ名
-          REPO:  minbreeder-sheets                  # ← 本番リポ名
+          GH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+          OWNER: ryujin2023
+          REPO:  minbreeder-sheets
         run: |
+          TS="$(date -u +%Y%m%d%H%M)"  # 送信識別子（同一分）
           curl -s -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_TOKEN" \
             https://api.github.com/repos/$OWNER/$REPO/dispatches \
-            -d '{"event_type":"hourly"}'
-          echo "dispatched hourly to $OWNER/$REPO at $(date -u)"
+            -d "{\"event_type\":\"hourly\",\"client_payload\":{\"ts\":\"$TS\"}}"
+          echo "dispatched hourly ($TS) to $OWNER/$REPO"
