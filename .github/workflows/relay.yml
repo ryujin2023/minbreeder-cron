@@ -2,7 +2,8 @@ name: relay-hourly
 
 on:
   schedule:
-    - cron: "0 * * * *"      # 毎時
+    #- cron: "0 * * * *"      # 毎時
+    - cron: "*/5 * * * *"      # 毎時
   workflow_dispatch: {}
 
 jobs:
