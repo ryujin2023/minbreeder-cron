@@ -2,7 +2,7 @@ name: relay-hourly
 
 on:
   schedule:
-    - cron: "0 * * * *"    # 毎時（UTC）
+    - cron: "0 */3 * * *"    # 毎時（UTC）
   workflow_dispatch: {}
 
 # ← 二重起動しても dispatch は常に1本だけになる
