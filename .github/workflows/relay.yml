@@ -1,11 +1,10 @@
-name: relay-hourly
+name: relay-twice-daily
 
 on:
   schedule:
-    - cron: "0 */3 * * *"    # 3時間ごと（UTC）
+    - cron: "0 0,12 * * *"    # JST 09:00 / 21:00
   workflow_dispatch: {}
 
-# 実行中のリレーをキャンセルしない。重複排除は別途必要。
 concurrency:
   group: relay-hourly
   cancel-in-progress: false
@@ -18,14 +17,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
           OWNER: ryujin2023
-          REPO:  minbreeder-sheets
+          REPO: minbreeder-sheets
         run: |
-          TS="$(date -u +%Y%m%d%H%M)"  # 送信識別子（同一分）
+          TS="$(date -u +%Y%m%d%H%M)"
           code=$(curl --silent --show-error --fail-with-body --connect-timeout 10 --max-time 30 -o dispatch-response.txt -w "%{http_code}" -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_TOKEN" \
             https://api.github.com/repos/$OWNER/$REPO/dispatches \
             -d "{\"event_type\":\"hourly\",\"client_payload\":{\"ts\":\"$TS\"}}")
           test "$code" = "204" || { echo "Unexpected dispatch HTTP $code"; exit 1; }
-          echo "dispatched hourly ($TS) to $OWNER/$REPO"
-
+          echo "dispatched twice-daily ($TS) to $OWNER/$REPO"
