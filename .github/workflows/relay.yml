@@ -1,8 +1,7 @@
-name: relay-twice-daily
+name: relay-manual
 
 on:
-  schedule:
-    - cron: "0 0,12 * * *"    # JST 09:00 / 21:00
+  # 自動起動はminbreeder-sheetsへ移行。二重収集を防ぐ。
   workflow_dispatch: {}
 
 concurrency:
@@ -26,4 +25,4 @@ jobs:
             https://api.github.com/repos/$OWNER/$REPO/dispatches \
             -d "{\"event_type\":\"hourly\",\"client_payload\":{\"ts\":\"$TS\"}}")
           test "$code" = "204" || { echo "Unexpected dispatch HTTP $code"; exit 1; }
-          echo "dispatched twice-daily ($TS) to $OWNER/$REPO"
+          echo "dispatched manually ($TS) to $OWNER/$REPO"
